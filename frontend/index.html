@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Inventory Management System</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+
+<body>
+
+<div class="app-container">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+        <div class="logo">
+            <i class="fa-solid fa-boxes-stacked"></i>
+            <span>Inventory<span class="highlight">Pro</span></span>
+        </div>
+
+        <div class="menu-title">MAIN MENU</div>
+
+        <nav>
+            <a href="#" class="nav-link active" data-page="dashboard">
+                <i class="fa-solid fa-chart-line"></i>
+                Dashboard
+            </a>
+
+            <a href="#" class="nav-link" data-page="products">
+                <i class="fa-solid fa-box"></i>
+                Products
+            </a>
+
+            <a href="#" class="nav-link" data-page="categories">
+                <i class="fa-solid fa-layer-group"></i>
+                Categories
+            </a>
+
+            <a href="#" class="nav-link" data-page="suppliers">
+                <i class="fa-solid fa-truck"></i>
+                Suppliers
+            </a>
+
+            <div class="menu-title">TRANSACTIONS</div>
+
+            <a href="#" class="nav-link" data-page="purchases">
+                <i class="fa-solid fa-cart-shopping"></i>
+                Purchases
+            </a>
+
+            <a href="#" class="nav-link" data-page="sales">
+                <i class="fa-solid fa-money-bill-wave"></i>
+                Sales
+            </a>
+
+            <a href="#" class="nav-link" data-page="low-stock">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                Low Stock
+            </a>
+        </nav>
+
+        <div class="sidebar-bottom">
+            <div class="user-info">
+                <div class="avatar">A</div>
+                <div>
+                    <strong>Administrator</strong>
+                    <span>Inventory Admin</span>
+                </div>
+            </div>
+        </div>
+
+    </aside>
+
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+
+        <!-- TOPBAR -->
+        <header class="topbar">
+            <div>
+                <h1 id="page-title">Dashboard</h1>
+                <p id="page-subtitle">Overview of your inventory</p>
+            </div>
+
+            <div class="topbar-right">
+                <button class="icon-btn" onclick="loadDashboard()">
+                    <i class="fa-solid fa-rotate"></i>
+                </button>
+
+                <div class="admin-profile">
+                    <div class="profile-avatar">A</div>
+                    <div>
+                        <strong>Admin</strong>
+                        <small>Administrator</small>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+
+        <!-- DASHBOARD PAGE -->
+        <section class="page active-page" id="dashboard">
+
+            <div class="stats-grid">
+
+                <div class="stat-card">
+                    <div class="stat-icon blue">
+                        <i class="fa-solid fa-box"></i>
+                    </div>
+                    <div>
+                        <p>Total Products</p>
+                        <h2 id="total-products">0</h2>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon purple">
+                        <i class="fa-solid fa-cubes"></i>
+                    </div>
+                    <div>
+                        <p>Total Stock</p>
+                        <h2 id="total-stock">0</h2>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon green">
+                        <i class="fa-solid fa-cart-arrow-down"></i>
+                    </div>
+                    <div>
+                        <p>Total Purchases</p>
+                        <h2 id="total-purchases">₹0</h2>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon orange">
+                        <i class="fa-solid fa-chart-column"></i>
+                    </div>
+                    <div>
+                        <p>Total Sales</p>
+                        <h2 id="total-sales">₹0</h2>
+                    </div>
+                </div>
+
+            </div>
+
+
+            <div class="dashboard-grid">
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Recent Products</h3>
+                        <button onclick="showPage('products')">View All</button>
+                    </div>
+
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Product Name</th>
+                                    <th>Price</th>
+                                    <th>Stock</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dashboard-products"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+
+                <div class="card low-stock-card">
+                    <div class="card-header">
+                        <h3>
+                            <i class="fa-solid fa-triangle-exclamation warning-icon"></i>
+                            Low Stock Alerts
+                        </h3>
+                        <span class="badge" id="low-stock-count">0</span>
+                    </div>
+
+                    <div id="dashboard-low-stock"></div>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- PRODUCTS PAGE -->
+        <section class="page" id="products">
+
+            <div class="page-actions">
+                <input
+                    type="text"
+                    id="product-search"
+                    placeholder="Search products..."
+                    oninput="searchProducts()">
+
+                <button class="primary-btn" onclick="openProductModal()">
+                    <i class="fa-solid fa-plus"></i>
+                    Add Product
+                </button>
+            </div>
+
+            <div class="card">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Product</th>
+                                <th>Category ID</th>
+                                <th>Supplier ID</th>
+                                <th>Price</th>
+                                <th>Quantity</th>
+                                <th>Min Stock</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="products-table"></tbody>
+                    </table>
+                </div>
+            </div>
+
+        </section>
+
+
+        <!-- CATEGORIES PAGE -->
+        <section class="page" id="categories">
+
+            <div class="page-actions">
+                <div></div>
+
+                <button class="primary-btn" onclick="openCategoryModal()">
+                    <i class="fa-solid fa-plus"></i>
+                    Add Category
+                </button>
+            </div>
+
+            <div class="card">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Category Name</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="categories-table"></tbody>
+                    </table>
+                </div>
+            </div>
+
+        </section>
+
+
+        <!-- SUPPLIERS PAGE -->
+        <section class="page" id="suppliers">
+
+            <div class="page-actions">
+                <div></div>
+
+                <button class="primary-btn" onclick="openSupplierModal()">
+                    <i class="fa-solid fa-plus"></i>
+                    Add Supplier
+                </button>
+            </div>
+
+            <div class="card">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Supplier Name</th>
+                                <th>Phone</th>
+                                <th>Email</th>
+                                <th>Address</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="suppliers-table"></tbody>
+                    </table>
+                </div>
+            </div>
+
+        </section>
+
+
+        <!-- PURCHASE PAGE -->
+        <section class="page" id="purchases">
+
+            <div class="form-layout">
+
+                <div class="card">
+                    <h3>New Purchase</h3>
+
+                    <form id="purchase-form">
+
+                        <div class="form-group">
+                            <label>Supplier</label>
+                            <select id="purchase-supplier" required></select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Product</label>
+                            <select id="purchase-product" required></select>
+                        </div>
+
+                        <div class="form-row">
+
+                            <div class="form-group">
+                                <label>Quantity</label>
+                                <input type="number"
+                                       id="purchase-quantity"
+                                       min="1"
+                                       required>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Unit Price</label>
+                                <input type="number"
+                                       id="purchase-price"
+                                       min="0"
+                                       step="0.01"
+                                       required>
+                            </div>
+
+                        </div>
+
+                        <button type="submit" class="primary-btn full-btn">
+                            <i class="fa-solid fa-cart-plus"></i>
+                            Add Purchase
+                        </button>
+
+                    </form>
+                </div>
+
+
+                <div class="card">
+                    <h3>Purchase History</h3>
+
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Purchase ID</th>
+                                    <th>Supplier ID</th>
+                                    <th>Product ID</th>
+                                    <th>Quantity</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="purchases-table"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- SALES PAGE -->
+        <section class="page" id="sales">
+
+            <div class="form-layout">
+
+                <div class="card">
+                    <h3>New Sale</h3>
+
+                    <form id="sale-form">
+
+                        <div class="form-group">
+                            <label>Customer Name</label>
+                            <input
+                                type="text"
+                                id="customer-name"
+                                placeholder="Walk-in Customer">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Product</label>
+                            <select id="sale-product" required></select>
+                        </div>
+
+                        <div class="form-row">
+
+                            <div class="form-group">
+                                <label>Quantity</label>
+                                <input
+                                    type="number"
+                                    id="sale-quantity"
+                                    min="1"
+                                    required>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Unit Price</label>
+                                <input
+                                    type="number"
+                                    id="sale-price"
+                                    min="0"
+                                    step="0.01"
+                                    required>
+                            </div>
+
+                        </div>
+
+                        <button type="submit" class="primary-btn full-btn">
+                            <i class="fa-solid fa-cash-register"></i>
+                            Complete Sale
+                        </button>
+
+                    </form>
+                </div>
+
+
+                <div class="card">
+                    <h3>Sales History</h3>
+
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Sale ID</th>
+                                    <th>Customer</th>
+                                    <th>Product ID</th>
+                                    <th>Quantity</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="sales-table"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- LOW STOCK PAGE -->
+        <section class="page" id="low-stock">
+
+            <div class="alert-banner">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                These products have reached or fallen below their minimum stock level.
+            </div>
+
+            <div class="card">
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Product</th>
+                                <th>Current Quantity</th>
+                                <th>Minimum Stock</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="low-stock-table"></tbody>
+                    </table>
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+
+<!-- PRODUCT MODAL -->
+<div class="modal" id="product-modal">
+
+    <div class="modal-content">
+
+        <div class="modal-header">
+            <h2 id="product-modal-title">Add Product</h2>
+
+            <button onclick="closeModal('product-modal')">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <form id="product-form">
+
+            <input type="hidden" id="product-id">
+
+            <div class="form-group">
+                <label>Product Name</label>
+                <input type="text" id="product-name" required>
+            </div>
+
+            <div class="form-group">
+                <label>Category</label>
+                <select id="product-category"></select>
+            </div>
+
+            <div class="form-group">
+                <label>Supplier</label>
+                <select id="product-supplier"></select>
+            </div>
+
+            <div class="form-row">
+
+                <div class="form-group">
+                    <label>Price</label>
+                    <input type="number"
+                           id="product-price"
+                           min="0"
+                           step="0.01"
+                           required>
+                </div>
+
+                <div class="form-group">
+                    <label>Quantity</label>
+                    <input type="number"
+                           id="product-quantity"
+                           min="0"
+                           value="0"
+                           required>
+                </div>
+
+            </div>
+
+            <div class="form-group">
+                <label>Minimum Stock</label>
+                <input type="number"
+                       id="product-minimum-stock"
+                       min="0"
+                       value="5"
+                       required>
+            </div>
+
+            <button type="submit" class="primary-btn full-btn">
+                Save Product
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<!-- CATEGORY MODAL -->
+<div class="modal" id="category-modal">
+
+    <div class="modal-content small-modal">
+
+        <div class="modal-header">
+            <h2 id="category-modal-title">Add Category</h2>
+
+            <button onclick="closeModal('category-modal')">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <form id="category-form">
+
+            <input type="hidden" id="category-id">
+
+            <div class="form-group">
+                <label>Category Name</label>
+                <input type="text" id="category-name" required>
+            </div>
+
+            <button class="primary-btn full-btn">
+                Save Category
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<!-- SUPPLIER MODAL -->
+<div class="modal" id="supplier-modal">
+
+    <div class="modal-content">
+
+        <div class="modal-header">
+            <h2 id="supplier-modal-title">Add Supplier</h2>
+
+            <button onclick="closeModal('supplier-modal')">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <form id="supplier-form">
+
+            <input type="hidden" id="supplier-id">
+
+            <div class="form-group">
+                <label>Supplier Name</label>
+                <input type="text" id="supplier-name" required>
+            </div>
+
+            <div class="form-row">
+
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="text" id="supplier-phone">
+                </div>
+
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="supplier-email">
+                </div>
+
+            </div>
+
+            <div class="form-group">
+                <label>Address</label>
+                <textarea id="supplier-address"></textarea>
+            </div>
+
+            <button class="primary-btn full-btn">
+                Save Supplier
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+
+<script src="script.js"></script>
+
+</body>
+</html>
