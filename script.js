@@ -1,4 +1,10 @@
-const API_URL = "https://inventorypro-6lhl.onrender.com";
+const API_URL = ["localhost", "127.0.0.1"].includes(window.location.hostname)
+    ? `${window.location.protocol}//${window.location.hostname}:5000`
+    : "https://inventorypro-6lhl.onrender.com";
+
+async function apiFetch(url, options = {}) {
+    return fetch(url, options);
+}
 
 let productsData = [];
 let categoriesData = [];
@@ -1282,11 +1288,5 @@ function showToast(message, type = "success") {
 ========================= */
 
 document.addEventListener("DOMContentLoaded", () => {
-
-    window.authReady.then(isAuthenticated => {
-        if (isAuthenticated) {
-            loadDashboard();
-        }
-    });
-
+    loadDashboard();
 });

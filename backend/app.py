@@ -1,21 +1,8 @@
-import os
-import secrets
-from datetime import timedelta
-from functools import wraps
-from hmac import compare_digest
-
-from flask import Flask, jsonify, request, session
+from flask import Flask, jsonify, request
 from flask_cors import CORS
-from werkzeug.security import check_password_hash, generate_password_hash
 from database import get_db_connection
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("FLASK_SECRET_KEY") or secrets.token_hex(32)
-app.config.update(
-    SESSION_COOKIE_HTTPONLY=True,
-    SESSION_COOKIE_SAMESITE="Lax",
-    PERMANENT_SESSION_LIFETIME=timedelta(hours=8),
-)
 CORS(
     app,
     origins=[
@@ -23,18 +10,7 @@ CORS(
         "http://localhost:8000",
         "https://inventorypro-1-ov0b.onrender.com",
     ],
-    supports_credentials=True,
 )
-
-def login_required(view):
-    @wraps(view)
-    def wrapped(*args, **kwargs):
-        if "user_id" not in session:
-            return jsonify({"error": "Authentication required"}), 401
-        return view(*args, **kwargs)
-
-    return wrapped
-
 
 # Home route
 @app.route("/")
@@ -44,7 +20,6 @@ def home():
 
 # Get all products
 @app.route("/products", methods=["GET"])
-@login_required
 def get_products():
     try:
         connection = get_db_connection()
@@ -64,7 +39,6 @@ def get_products():
 
 # Add a new product
 @app.route("/products", methods=["POST"])
-@login_required
 def add_product():
     try:
         data = request.json
@@ -107,7 +81,6 @@ def add_product():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 @app.route("/products/<int:product_id>", methods=["PUT"])
-@login_required
 def update_product(product_id):
     connection = None
 
@@ -189,7 +162,6 @@ def update_product(product_id):
 
         return jsonify({"error": str(e)}), 500
 @app.route("/products/<int:product_id>", methods=["DELETE"])
-@login_required
 def delete_product(product_id):
     connection = None
 
@@ -268,7 +240,6 @@ def delete_product(product_id):
 
 # Get all categories
 @app.route("/categories", methods=["GET"])
-@login_required
 def get_categories():
     connection = None
 
@@ -298,7 +269,6 @@ def get_categories():
 
 # Add a new category
 @app.route("/categories", methods=["POST"])
-@login_required
 def add_category():
     try:
         data = request.json
@@ -334,7 +304,6 @@ def add_category():
     
 # Delete a category
 @app.route("/categories/<int:category_id>", methods=["DELETE"])
-@login_required
 def delete_category(category_id):
     connection = None
 
@@ -399,7 +368,6 @@ def delete_category(category_id):
 
         return jsonify({"error": str(e)}), 500
 @app.route("/categories/<int:category_id>", methods=["PUT"])
-@login_required
 def update_category(category_id):
     connection = None
 
@@ -462,7 +430,6 @@ def update_category(category_id):
 
     # Get all suppliers
 @app.route("/suppliers", methods=["GET"])
-@login_required
 def get_suppliers():
     try:
         connection = get_db_connection()
@@ -481,7 +448,6 @@ def get_suppliers():
     # Add a new supplier
 # Add a new supplier
 @app.route("/suppliers", methods=["POST"])
-@login_required
 def add_supplier():
     try:
         data = request.json
@@ -521,7 +487,6 @@ def add_supplier():
         return jsonify({"error": str(e)}), 500 
 
 @app.route("/suppliers/<int:supplier_id>", methods=["PUT"])
-@login_required
 def update_supplier(supplier_id):
     connection = None
 
@@ -615,7 +580,6 @@ def update_supplier(supplier_id):
         return jsonify({"error": str(e)}), 500
 
 @app.route("/suppliers/<int:supplier_id>", methods=["DELETE"])
-@login_required
 def delete_supplier(supplier_id):
     connection = None
 
@@ -680,69 +644,8 @@ def delete_supplier(supplier_id):
 
         return jsonify({"error": str(e)}), 500
         
-    # Get all users
-@app.route("/users", methods=["GET"])
-@login_required
-def get_users():
-    try:
-        connection = get_db_connection()
-        cursor = connection.cursor(dictionary=True)
-
-        cursor.execute("SELECT user_id, name, email, role FROM users")
-        users = cursor.fetchall()
-
-        cursor.close()
-        connection.close()
-
-        return jsonify(users)
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-# Add a new user
-@app.route("/users", methods=["POST"])
-@login_required
-def add_user():
-    try:
-        data = request.json
-
-        name = data["name"]
-        email = data["email"]
-        password = data["password"]
-        role = data.get("role", "user")
-
-        connection = get_db_connection()
-        cursor = connection.cursor()
-
-        query = """
-            INSERT INTO users
-            (name, email, password, role)
-            VALUES (%s, %s, %s, %s)
-        """
-
-        values = (
-            name,
-            email,
-            generate_password_hash(password),
-            role
-        )
-
-        cursor.execute(query, values)
-        connection.commit()
-
-        cursor.close()
-        connection.close()
-
-        return jsonify({
-            "message": "User added successfully!"
-        }), 201
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
 # Create a purchase and increase product stock
 @app.route("/purchases", methods=["POST"])
-@login_required
 def add_purchase():
     connection = None
 
@@ -847,7 +750,6 @@ def add_purchase():
 
         return jsonify({"error": str(e)}), 500
 @app.route("/purchases", methods=["GET"])
-@login_required
 def get_purchases():
     connection = None
 
@@ -888,7 +790,6 @@ def get_purchases():
 
     # Create a sale and reduce product stock
 @app.route("/sales", methods=["POST"])
-@login_required
 def add_sale():
     connection = None
 
@@ -994,7 +895,6 @@ def add_sale():
 
         return jsonify({"error": str(e)}), 500
 @app.route("/sales", methods=["GET"])
-@login_required
 def get_sales():
     connection = None
 
@@ -1034,7 +934,6 @@ def get_sales():
 
     # Get low-stock products
 @app.route("/products/low-stock", methods=["GET"])
-@login_required
 def get_low_stock_products():
     try:
         connection = get_db_connection()
@@ -1058,7 +957,6 @@ def get_low_stock_products():
 
 # Inventory dashboard
 @app.route("/dashboard", methods=["GET"])
-@login_required
 def dashboard():
     try:
         connection = get_db_connection()
@@ -1102,99 +1000,5 @@ def dashboard():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-    # User Login
-@app.route("/login", methods=["POST"])
-def login():
-    connection = None
-
-    try:
-        data = request.get_json(silent=True) or {}
-
-        email = data.get("email")
-        password = data.get("password")
-
-        if not isinstance(email, str) or not isinstance(password, str):
-            return jsonify({
-                "error": "Email and password are required"
-            }), 400
-
-        email = email.strip().casefold()
-        if not email or not password:
-            return jsonify({
-                "error": "Email and password are required"
-            }), 400
-
-        connection = get_db_connection()
-        cursor = connection.cursor(dictionary=True)
-
-        cursor.execute("""
-            SELECT user_id, name, email, role, password
-            FROM users
-            WHERE LOWER(email) = %s
-        """, (email,))
-
-        user = cursor.fetchone()
-
-        if user:
-            stored_password = user["password"]
-            is_hashed = stored_password.startswith(("scrypt:", "pbkdf2:"))
-            password_matches = (
-                check_password_hash(stored_password, password)
-                if is_hashed
-                else compare_digest(stored_password, password)
-            )
-        else:
-            password_matches = False
-
-        if user and password_matches and not is_hashed:
-            cursor.execute(
-                "UPDATE users SET password = %s WHERE user_id = %s",
-                (generate_password_hash(password), user["user_id"]),
-            )
-            connection.commit()
-
-        cursor.close()
-        connection.close()
-
-        if not user or not password_matches:
-            return jsonify({
-                "error": "Invalid email or password"
-            }), 401
-
-        user.pop("password")
-        session.clear()
-        session.permanent = True
-        session["user_id"] = user["user_id"]
-        session["user"] = user
-
-        return jsonify({
-            "message": "Login successful",
-            "user": user
-        }), 200
-
-    except Exception as e:
-
-        if connection:
-            connection.close()
-
-        return jsonify({
-            "error": str(e)
-        }), 500
-
-
-@app.route("/session", methods=["GET"])
-def current_session():
-    if "user_id" not in session:
-        return jsonify({"error": "Authentication required"}), 401
-    return jsonify({"user": session["user"]})
-
-
-@app.route("/logout", methods=["POST"])
-def logout():
-    session.clear()
-    return jsonify({"message": "Logged out"})
-    
-    
-    
 if __name__ == "__main__":
     app.run(host="127.0.0.1", debug=False)
