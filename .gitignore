@@ -3,3 +3,26 @@ __pycache__/
 .venv/
 venv/
 .env
+
+# Python virtual environments
+venv/
+.venv/
+backend/venv/
+
+# Python cache files
+__pycache__/
+*.py[cod]
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Database files and dumps
+*.db
+*.sqlite
+*.sqlite3
+*.sql
+
+# Logs
+*.log

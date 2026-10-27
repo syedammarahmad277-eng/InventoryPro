@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="auth-pending">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Inventory Management System</title>
 
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=dashboard-refresh-1">
 
     <!-- Font Awesome Icons -->
     <link rel="stylesheet"
@@ -68,10 +68,10 @@
 
         <div class="sidebar-bottom">
             <div class="user-info">
-                <div class="avatar">A</div>
+                <div class="avatar" id="sidebar-avatar">U</div>
                 <div>
-                    <strong>Administrator</strong>
-                    <span>Inventory Admin</span>
+                    <strong id="sidebar-name">User</strong>
+                    <span id="sidebar-role">Inventory user</span>
                 </div>
             </div>
         </div>
@@ -90,15 +90,25 @@
             </div>
 
             <div class="topbar-right">
-                <button class="icon-btn" onclick="loadDashboard()">
+                <button class="logout-btn" type="button" aria-label="Sign out" onclick="logout()">
+                    <i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i>
+                    <span>Sign out</span>
+                </button>
+
+                <button class="theme-btn" id="theme-toggle" aria-label="Switch to dark theme" title="Switch to dark theme" type="button">
+                    <i class="fa-solid fa-moon"></i>
+                    <span>Dark mode</span>
+                </button>
+
+                <button class="icon-btn" onclick="loadDashboard()" aria-label="Refresh dashboard" title="Refresh dashboard">
                     <i class="fa-solid fa-rotate"></i>
                 </button>
 
                 <div class="admin-profile">
-                    <div class="profile-avatar">A</div>
+                    <div class="profile-avatar" id="profile-avatar">U</div>
                     <div>
-                        <strong>Admin</strong>
-                        <small>Administrator</small>
+                        <strong id="profile-name">User</strong>
+                        <small id="profile-role">Inventory user</small>
                     </div>
                 </div>
             </div>
@@ -107,6 +117,21 @@
 
         <!-- DASHBOARD PAGE -->
         <section class="page active-page" id="dashboard">
+
+            <div class="dashboard-hero">
+                <div class="dashboard-hero-copy">
+                    <span class="dashboard-hero-label">
+                        <i class="fa-solid fa-warehouse" aria-hidden="true"></i>
+                        INVENTORY OVERVIEW
+                    </span>
+                    <h2>Your inventory,<br>all in one place.</h2>
+                    <p>Keep stock, products, and sales moving with a clear view of your business.</p>
+                    <button class="hero-action" type="button" onclick="showPage('products')">
+                        Explore products
+                        <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
 
             <div class="stats-grid">
 
@@ -512,12 +537,12 @@
             </div>
 
             <div class="form-group">
-                <label>Category</label>
+                <label>Category (optional)</label>
                 <select id="product-category"></select>
             </div>
 
             <div class="form-group">
-                <label>Supplier</label>
+                <label>Supplier (optional)</label>
                 <select id="product-supplier"></select>
             </div>
 
@@ -652,7 +677,8 @@
 <div id="toast"></div>
 
 
-<script src="script.js"></script>
+<script src="auth.js?v=auth-login-1"></script>
+<script src="script.js?v=auth-login-1"></script>
 
 </body>
 </html>

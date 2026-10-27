@@ -1,8 +1,45 @@
-const API_URL = "http://127.0.0.1:5000";
+const API_URL = `${window.location.protocol}//${window.location.hostname}:5000`;
 
 let productsData = [];
 let categoriesData = [];
 let suppliersData = [];
+
+const themeToggle = document.getElementById("theme-toggle");
+const savedTheme = localStorage.getItem("inventory-theme");
+const initialTheme = savedTheme === "dark" ? "dark" : "light";
+
+applyTheme(initialTheme);
+themeToggle.addEventListener("click", toggleTheme);
+
+
+function applyTheme(theme) {
+    document.documentElement.dataset.theme = theme;
+    document.body.dataset.theme = theme;
+    updateThemeToggle(theme);
+}
+
+
+function updateThemeToggle(theme) {
+    const nextTheme = theme === "dark" ? "light" : "dark";
+    const icon = themeToggle.querySelector("i");
+
+    themeToggle.setAttribute("aria-label", `Switch to ${nextTheme} theme`);
+    themeToggle.title = `Switch to ${nextTheme} theme`;
+    themeToggle.querySelector("span").textContent =
+        nextTheme === "dark" ? "Dark mode" : "Light mode";
+    icon.className = theme === "dark"
+        ? "fa-solid fa-sun"
+        : "fa-solid fa-moon";
+}
+
+
+function toggleTheme() {
+    const nextTheme =
+        document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+
+    applyTheme(nextTheme);
+    localStorage.setItem("inventory-theme", nextTheme);
+}
 
 
 /* =========================
@@ -79,7 +116,7 @@ async function loadDashboard() {
 
     try {
 
-        const response = await fetch(`${API_URL}/dashboard`);
+        const response = await apiFetch(`${API_URL}/dashboard`);
         const data = await response.json();
 
         if (!response.ok) {
@@ -107,7 +144,16 @@ async function loadDashboard() {
     } catch (error) {
 
         console.error(error);
-        showToast("Cannot connect to backend. Make sure Flask is running.", "error");
+        document.getElementById("total-products").textContent = "—";
+        document.getElementById("total-stock").textContent = "—";
+        document.getElementById("total-purchases").textContent = "—";
+        document.getElementById("total-sales").textContent = "—";
+        document.getElementById("low-stock-count").textContent = "—";
+
+        const message = error instanceof TypeError
+            ? "Cannot connect to backend. Make sure Flask is running."
+            : "Dashboard data unavailable. Check the MySQL connection.";
+        showToast(message, "error");
     }
 }
 
@@ -116,7 +162,7 @@ async function loadDashboardProducts() {
 
     try {
 
-        const response = await fetch(`${API_URL}/products`);
+        const response = await apiFetch(`${API_URL}/products`);
         const products = await response.json();
 
         const table = document.getElementById("dashboard-products");
@@ -140,7 +186,10 @@ async function loadDashboardProducts() {
             table.innerHTML = `
                 <tr>
                     <td colspan="4" class="empty-row">
-                        No products available
+                        <p>No products have been added yet.</p>
+                        <button class="primary-btn" onclick="showPage('products')">
+                            Add your first product
+                        </button>
                     </td>
                 </tr>
             `;
@@ -156,7 +205,7 @@ async function loadDashboardLowStock() {
 
     try {
 
-        const response = await fetch(`${API_URL}/products/low-stock`);
+        const response = await apiFetch(`${API_URL}/products/low-stock`);
         const products = await response.json();
 
         const container =
@@ -199,7 +248,7 @@ async function loadProducts() {
 
     try {
 
-        const response = await fetch(`${API_URL}/products`);
+        const response = await apiFetch(`${API_URL}/products`);
         productsData = await response.json();
 
         displayProducts(productsData);
@@ -223,7 +272,11 @@ function displayProducts(products) {
         table.innerHTML = `
             <tr>
                 <td colspan="8" class="empty-row">
-                    No products found
+                    <p>No products have been added yet.</p>
+                    <button class="primary-btn" onclick="openProductModal()">
+                        <i class="fa-solid fa-plus"></i>
+                        Add your first product
+                    </button>
                 </td>
             </tr>
         `;
@@ -416,7 +469,7 @@ document.getElementById("product-form")
 
         const method = id ? "PUT" : "POST";
 
-        const response = await fetch(url, {
+        const response = await apiFetch(url, {
 
             method: method,
 
@@ -455,7 +508,7 @@ async function deleteProduct(id) {
 
     try {
 
-        const response = await fetch(
+        const response = await apiFetch(
             `${API_URL}/products/${id}`,
             { method: "DELETE" }
         );
@@ -485,7 +538,7 @@ async function deleteProduct(id) {
 async function loadCategoriesData() {
 
     const response =
-        await fetch(`${API_URL}/categories`);
+        await apiFetch(`${API_URL}/categories`);
 
     categoriesData =
         await response.json();
@@ -597,7 +650,7 @@ document.getElementById("category-form")
 
     try {
 
-        const response = await fetch(
+        const response = await apiFetch(
             id
                 ? `${API_URL}/categories/${id}`
                 : `${API_URL}/categories`,
@@ -637,7 +690,7 @@ async function deleteCategory(id) {
 
     try {
 
-        const response = await fetch(
+        const response = await apiFetch(
             `${API_URL}/categories/${id}`,
             { method: "DELETE" }
         );
@@ -666,7 +719,7 @@ async function deleteCategory(id) {
 async function loadSuppliersData() {
 
     const response =
-        await fetch(`${API_URL}/suppliers`);
+        await apiFetch(`${API_URL}/suppliers`);
 
     suppliersData =
         await response.json();
@@ -800,7 +853,7 @@ document.getElementById("supplier-form")
 
     try {
 
-        const response = await fetch(
+        const response = await apiFetch(
             id
                 ? `${API_URL}/suppliers/${id}`
                 : `${API_URL}/suppliers`,
@@ -840,7 +893,7 @@ async function deleteSupplier(id) {
 
     try {
 
-        const response = await fetch(
+        const response = await apiFetch(
             `${API_URL}/suppliers/${id}`,
             { method: "DELETE" }
         );
@@ -928,7 +981,7 @@ document.getElementById("purchase-form")
 
     try {
 
-        const response = await fetch(`${API_URL}/purchases`, {
+        const response = await apiFetch(`${API_URL}/purchases`, {
 
             method: "POST",
 
@@ -964,7 +1017,7 @@ async function loadPurchases() {
     try {
 
         const response =
-            await fetch(`${API_URL}/purchases`);
+            await apiFetch(`${API_URL}/purchases`);
 
         const purchases =
             await response.json();
@@ -1057,7 +1110,7 @@ document.getElementById("sale-form")
 
     try {
 
-        const response = await fetch(`${API_URL}/sales`, {
+        const response = await apiFetch(`${API_URL}/sales`, {
 
             method: "POST",
 
@@ -1096,7 +1149,7 @@ async function loadSales() {
     try {
 
         const response =
-            await fetch(`${API_URL}/sales`);
+            await apiFetch(`${API_URL}/sales`);
 
         const sales =
             await response.json();
@@ -1146,7 +1199,7 @@ async function loadLowStock() {
     try {
 
         const response =
-            await fetch(`${API_URL}/products/low-stock`);
+            await apiFetch(`${API_URL}/products/low-stock`);
 
         const products =
             await response.json();
@@ -1230,12 +1283,10 @@ function showToast(message, type = "success") {
 
 document.addEventListener("DOMContentLoaded", () => {
 
-    loadDashboard();
+    window.authReady.then(isAuthenticated => {
+        if (isAuthenticated) {
+            loadDashboard();
+        }
+    });
 
 });
-function logout() {
-
-    localStorage.removeItem("inventoryUser");
-
-    window.location.href = "login.html";
-}
