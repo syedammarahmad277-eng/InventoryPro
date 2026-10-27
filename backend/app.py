@@ -18,10 +18,13 @@ app.config.update(
 )
 CORS(
     app,
-    origins=["http://127.0.0.1:8000", "http://localhost:8000"],
+    origins=[
+        "http://127.0.0.1:8000",
+        "http://localhost:8000",
+        "https://inventorypro-1-ov0b.onrender.com",
+    ],
     supports_credentials=True,
 )
-
 
 def login_required(view):
     @wraps(view)
