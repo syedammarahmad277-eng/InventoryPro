@@ -1,4 +1,4 @@
-const API_URL = `${window.location.protocol}//${window.location.hostname}:5000`;
+const API_URL = "https://inventorypro-6lhl.onrender.com";
 
 let productsData = [];
 let categoriesData = [];
